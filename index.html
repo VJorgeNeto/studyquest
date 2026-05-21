@@ -807,6 +807,7 @@ Rules:
     const data = await res.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) throw new Error('Gemini não retornou resposta. Verifique sua API key.');
+    console.log('Gemini raw:', text);
     return text;
   }
 
@@ -845,21 +846,26 @@ Rules:
       rawText2 = await _callClaude(prompt, apiKey);
     }
 
-    // Strip markdown fences and any leading text before the JSON
+    // Extract JSON robustly from the response
     let clean = rawText2.trim();
-    // Remove ```json ... ``` or ``` ... ```
+    // Remove markdown fences
     clean = clean.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
-    // If there's still non-JSON text before the {, strip it
+    // Slice to first { ... last }
     const jsonStart = clean.indexOf('{');
     const jsonEnd   = clean.lastIndexOf('}');
-    if (jsonStart > 0) clean = clean.slice(jsonStart);
-    if (jsonEnd !== -1 && jsonEnd < clean.length - 1) clean = clean.slice(0, jsonEnd + 1);
+    if (jsonStart !== -1) clean = clean.slice(jsonStart, jsonEnd + 1);
+    // Replace curly quotes and special apostrophes that break JSON
+    clean = clean
+      .replace(/[\u2018\u2019\u02bc]/g, "'")   // curly single quotes -> straight
+      .replace(/[\u201c\u201d]/g, '"')           // curly double quotes -> straight
+      .replace(/[\u2013\u2014]/g, '-');           // em/en dash -> hyphen
     let parsed;
     try { parsed = JSON.parse(clean); }
     catch (e) {
-      console.error('Gemini raw response:', rawText2);
+      console.error('Raw response:', rawText2);
+      console.error('Cleaned:', clean);
       console.error('Parse error:', e.message);
-      throw new Error('A IA retornou formato inválido. Veja o console (F12) para detalhes.');
+      throw new Error('A IA retornou formato inválido: ' + e.message);
     }
     return _sanitize(parsed);
   }
