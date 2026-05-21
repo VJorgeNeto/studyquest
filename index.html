@@ -785,12 +785,17 @@ Rules:
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        system_instruction: {
+          parts: [{ text: SYSTEM }]
+        },
         contents: [{
-          parts: [{ text: SYSTEM + '\n\n' + prompt }]
+          role: 'user',
+          parts: [{ text: prompt }]
         }],
         generationConfig: {
           temperature: 0.1,
           maxOutputTokens: 4000,
+          responseMimeType: 'application/json',
         },
       }),
     });
@@ -840,10 +845,22 @@ Rules:
       rawText2 = await _callClaude(prompt, apiKey);
     }
 
-    const clean = rawText2.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
+    // Strip markdown fences and any leading text before the JSON
+    let clean = rawText2.trim();
+    // Remove ```json ... ``` or ``` ... ```
+    clean = clean.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
+    // If there's still non-JSON text before the {, strip it
+    const jsonStart = clean.indexOf('{');
+    const jsonEnd   = clean.lastIndexOf('}');
+    if (jsonStart > 0) clean = clean.slice(jsonStart);
+    if (jsonEnd !== -1 && jsonEnd < clean.length - 1) clean = clean.slice(0, jsonEnd + 1);
     let parsed;
     try { parsed = JSON.parse(clean); }
-    catch { throw new Error('A IA retornou formato inválido. Tente novamente ou use outro provedor.'); }
+    catch (e) {
+      console.error('Gemini raw response:', rawText2);
+      console.error('Parse error:', e.message);
+      throw new Error('A IA retornou formato inválido. Veja o console (F12) para detalhes.');
+    }
     return _sanitize(parsed);
   }
 
