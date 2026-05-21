@@ -6,13 +6,247 @@
   <title>StudyQuest — Gamified Course Tracker</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css">
+  <style>
+/* =============================================
+   StudyQuest — Design System v3
+   Dark gaming aesthetic
+   Outfit (display) + JetBrains Mono
+   ============================================= */
+:root {
+  --bg:#080a0f; --bg2:#0d1018; --surface:#111520; --surface2:#161b28; --surface3:#1c2235;
+  --border:#1e2740; --border2:#252f45;
+  --accent:#4fffb0; --accent-d:#00cc80; --accent2:#7b68ee; --accent3:#ffd700; --accent4:#ff6b6b; --accent5:#4dc9ff;
+  --text:#dce4f5; --text2:#8a96b3; --text3:#4a5470;
+  --radius:12px; --radius-lg:16px; --radius-sm:8px;
+  --shadow:0 4px 24px rgba(0,0,0,0.4); --glow:0 0 20px rgba(79,255,176,0.15);
+  --font:'Outfit',sans-serif; --mono:'JetBrains Mono',monospace;
+  --sidebar-w:240px; --topbar-h:60px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:var(--font)}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex}
+
+/* ── SETUP / CONFIG ── */
+#screen-setup,#screen-config{flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;position:relative;overflow:hidden}
+.setup-bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+.setup-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:orb-float 8s ease-in-out infinite}
+.orb1{width:500px;height:500px;background:var(--accent);top:-150px;left:-100px}
+.orb2{width:400px;height:400px;background:var(--accent2);bottom:-100px;right:-50px;animation-delay:3s}
+.orb3{width:300px;height:300px;background:var(--accent5);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:6s}
+@keyframes orb-float{0%,100%{transform:translate(0,0)}33%{transform:translate(20px,-20px)}66%{transform:translate(-15px,15px)}}
+.setup-container{position:relative;z-index:1;width:100%;max-width:600px;padding:2rem 0}
+.setup-logo{display:flex;align-items:center;gap:.5rem;margin-bottom:2rem;font-weight:800;font-size:1.1rem}
+.logo-icon{font-size:1.4rem}.logo-text{color:var(--accent)}
+.setup-title{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:1rem}
+.setup-title em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.setup-sub{color:var(--text2);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:480px}
+.setup-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;display:flex;flex-direction:column;gap:1.75rem}
+.form-step{display:flex;flex-direction:column;gap:.6rem}
+.form-label{display:flex;align-items:center;gap:.5rem;font-weight:600;font-size:.95rem;flex-wrap:wrap}
+.step-num{font-family:var(--mono);font-size:10px;background:var(--accent);color:#000;padding:2px 6px;border-radius:4px;font-weight:700}
+.form-hint{font-size:.8rem;color:var(--text3);font-weight:400}
+.form-input,.form-textarea{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:.95rem;padding:.75rem 1rem;transition:border-color .2s,box-shadow .2s;width:100%;outline:none}
+.form-input:focus,.form-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,255,176,.1)}
+.form-textarea{min-height:140px;resize:vertical;line-height:1.6;font-size:.875rem}
+.input-row{display:flex;gap:.5rem}.input-row .form-input{flex:1}
+.btn-icon{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);padding:0 .75rem;font-size:1rem;transition:background .2s}
+.btn-icon:hover{background:var(--surface3)}
+.form-note{font-size:.78rem;color:var(--text3);line-height:1.5}
+.form-note code{background:var(--surface2);padding:1px 4px;border-radius:3px;font-family:var(--mono);font-size:.85em}
+.tech-suggestions{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.25rem}
+.tech-suggestions span{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:.25rem .75rem;font-size:.8rem;color:var(--text2);cursor:pointer;transition:all .2s}
+.tech-suggestions span:hover{border-color:var(--accent);color:var(--accent);background:rgba(79,255,176,.05)}
+.form-actions{display:flex;flex-direction:column;gap:.75rem}
+.btn-primary{background:linear-gradient(135deg,var(--accent-d),var(--accent));border:none;border-radius:var(--radius-sm);color:#000;font-family:var(--font);font-size:1rem;font-weight:700;padding:.875rem 1.5rem;width:100%;transition:opacity .2s,transform .1s;letter-spacing:-.2px}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}.btn-primary:active{transform:translateY(0)}.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.parse-error{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);border-radius:var(--radius-sm);color:var(--accent4);font-size:.85rem;padding:.75rem 1rem;line-height:1.5}
+.setup-footer{margin-top:1.5rem;text-align:center}
+.setup-footer a{color:var(--text3);font-size:.85rem;transition:color .2s}.setup-footer a:hover{color:var(--accent)}
+
+/* ── IDENTITY / EMOJI PICKER ── */
+.identity-row{display:flex;align-items:center;gap:.75rem}
+.emoji-preview-wrap{flex-shrink:0}
+.emoji-preview{width:48px;height:48px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;font-size:1.8rem;display:flex;align-items:center;justify-content:center;cursor:default;transition:border-color .2s}
+.emoji-picker-grid{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
+.emoji-opt{font-size:1.3rem;padding:.35rem;border-radius:7px;cursor:pointer;transition:all .15s;border:2px solid transparent;background:var(--surface2)}
+.emoji-opt:hover{background:var(--surface3);transform:scale(1.15)}
+.emoji-opt.selected{border-color:var(--accent);background:rgba(79,255,176,.1)}
+
+/* ── TRACKER LAYOUT ── */
+#screen-tracker{flex-direction:row}
+.sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:transform .3s;overflow-y:auto}
+.sidebar-header{display:flex;align-items:center;gap:.5rem;padding:1rem 1.25rem;border-bottom:1px solid var(--border);font-weight:800}
+.sidebar-close{background:none;border:none;color:var(--text3);font-size:.9rem;margin-left:auto;display:none}
+
+/* Sidebar user */
+.sidebar-user{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;border-bottom:1px solid var(--border)}
+.sb-big-emoji{font-size:1.8rem;flex-shrink:0}
+.sb-user-info{flex:1;min-width:0}
+.sb-name{font-size:.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-cloud{font-size:.7rem;color:var(--accent);font-family:var(--mono);margin-top:1px}
+
+.player-card{margin:.75rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem}
+.player-avatar{font-size:1.8rem;text-align:center;margin-bottom:.4rem}
+.player-info{text-align:center;margin-bottom:.6rem}
+.player-level{display:inline-block;background:var(--accent);color:#000;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:20px;margin-bottom:.25rem;font-family:var(--mono)}
+.player-title{font-size:.8rem;color:var(--text2);font-weight:600}
+.player-xp-bar{height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:.3rem}
+.player-xp-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:99px;transition:width .5s ease}
+.player-xp-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-align:right}
+
+.sidebar-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;padding:.6rem .75rem;border-bottom:1px solid var(--border)}
+.sstat{text-align:center;background:var(--surface2);border-radius:var(--radius-sm);padding:.4rem .2rem}
+.sstat-val{display:block;font-size:.95rem;font-weight:800;color:var(--accent)}
+.sstat-lbl{font-size:.62rem;color:var(--text3);font-family:var(--mono)}
+
+.sidebar-nav{flex:1;padding:.6rem;display:flex;flex-direction:column;gap:.2rem}
+.nav-item{display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border-radius:var(--radius-sm);font-size:.9rem;font-weight:500;color:var(--text2);transition:all .15s}
+.nav-item:hover{background:var(--surface2);color:var(--text)}.nav-item.active{background:rgba(79,255,176,.08);color:var(--accent);font-weight:600}
+.sidebar-footer{padding:.85rem;border-top:1px solid var(--border)}
+.btn-danger-sm{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text3);font-size:.8rem;padding:.45rem .75rem;width:100%;transition:all .2s}
+.btn-danger-sm:hover{border-color:var(--accent4);color:var(--accent4)}
+
+.main-content{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;gap:1rem;position:sticky;top:0;z-index:50}
+.topbar-menu{background:none;border:none;color:var(--text2);font-size:1.2rem;display:none}
+.topbar-title{flex:1}.topbar-title>span:first-child{font-size:1.1rem;font-weight:800;display:block;line-height:1.2}
+.topbar-course-tag{font-size:.7rem!important;color:var(--text3);font-family:var(--mono);font-weight:400!important;letter-spacing:1px;text-transform:uppercase}
+.topbar-xp span{background:rgba(79,255,176,.1);border:1px solid rgba(79,255,176,.2);border-radius:20px;color:var(--accent);font-family:var(--mono);font-size:.8rem;font-weight:700;padding:.3rem .75rem}
+
+.view{display:none;padding:1.5rem;flex:1}.view.active{display:block}
+.view-header{margin-bottom:1.5rem}.view-title{font-size:1.5rem;font-weight:800;margin-bottom:.25rem}.view-sub{color:var(--text2);font-size:.9rem}
+
+/* Global progress */
+.global-progress-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.gp-pct{font-size:2.5rem;font-weight:900;color:var(--accent);letter-spacing:-2px;line-height:1}
+.gp-label{font-weight:700;margin:.25rem 0 .15rem}.gp-sub{font-size:.82rem;color:var(--text2);font-family:var(--mono)}
+.gp-right{display:flex;align-items:center;gap:1rem}
+.gp-ring-wrap{position:relative;width:80px;height:80px}
+.gp-ring{width:80px;height:80px;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:6}
+.ring-fill{fill:none;stroke:url(#ringGrad);stroke-width:6;stroke-linecap:round;stroke-dasharray:213.6;stroke-dashoffset:213.6;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)}
+.gp-ring-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;color:var(--accent);font-family:var(--mono)}
+.gp-pills{display:flex;flex-direction:column;gap:.4rem}
+.gp-pill{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.35rem .7rem;text-align:center}
+.gp-pill span{display:block;font-size:.9rem;font-weight:700;color:var(--accent)}.gp-pill small{font-size:.7rem;color:var(--text3);font-family:var(--mono)}
+
+/* Modules */
+.modules-container{display:flex;flex-direction:column;gap:.85rem}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color .2s}
+.module-card:hover{border-color:var(--border2)}.module-card.mod-complete{border-color:rgba(79,255,176,.25)}
+.module-header{display:flex;align-items:center;gap:.9rem;padding:.9rem 1.15rem;cursor:pointer;user-select:none;transition:background .15s}
+.module-header:hover{background:rgba(255,255,255,.02)}
+.mod-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;border:1px solid transparent}
+.mod-meta{flex:1;min-width:0}.mod-tag{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px}
+.mod-title{font-size:.92rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.mod-badge-slot{font-size:1.2rem;flex-shrink:0;transition:opacity .3s}
+.mod-progress{display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+.mod-bar{width:65px;height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+.mod-bar-fill{height:100%;border-radius:99px;transition:width .4s ease}
+.mod-pct{font-family:var(--mono);font-size:11px;color:var(--text3);min-width:28px;text-align:right}
+.mod-toggle{color:var(--text3);font-size:12px;transition:transform .2s;flex-shrink:0}
+.module-card.expanded .mod-toggle{transform:rotate(180deg)}
+.lessons-list{border-top:1px solid var(--border);display:none}.module-card.expanded .lessons-list{display:block}
+.lesson-row{display:flex;align-items:center;gap:.7rem;padding:.55rem 1.15rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.lesson-row:last-child{border-bottom:none}.lesson-row:hover{background:var(--surface2)}
+.lesson-row.lesson-done{opacity:.55}.lesson-row.lesson-done .lesson-name{text-decoration:line-through;color:var(--text3)}
+.lesson-chk{width:19px;height:19px;border-radius:5px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;transition:all .2s;color:transparent}
+.lesson-row.lesson-done .lesson-chk{background:var(--accent);border-color:var(--accent);color:#000}
+.lesson-num{font-family:var(--mono);font-size:10px;color:var(--text3);min-width:20px;flex-shrink:0}
+.lesson-name{flex:1;font-size:.855rem;font-weight:400}
+.lesson-tags{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+.lesson-time{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.tag-pill{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px}
+.tag-video{background:rgba(123,104,238,.15);color:var(--accent2)}.tag-quiz{background:rgba(255,215,0,.12);color:var(--accent3)}.tag-hands{background:rgba(79,255,176,.1);color:var(--accent)}
+
+/* Achievements */
+.achievements-section{margin-bottom:2rem}
+.ach-section-title{font-size:.85rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--mono);margin-bottom:.85rem}
+.badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.65rem}
+.badge-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;text-align:center;transition:all .2s;position:relative;overflow:hidden}
+.badge-card.locked{opacity:.3;filter:grayscale(1)}.badge-card.unlocked{border-color:rgba(79,255,176,.3);box-shadow:0 0 20px rgba(79,255,176,.08)}
+.badge-icon{font-size:1.8rem;display:block;margin-bottom:.35rem}.badge-name{font-size:.72rem;font-weight:700;color:var(--text2)}.badge-desc{font-size:.67rem;color:var(--text3);margin-top:.15rem;font-family:var(--mono)}.badge-xp{font-size:.68rem;color:var(--accent);font-family:var(--mono);margin-top:.3rem;font-weight:700}
+.badge-unlocked-shine{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.special-achievements-grid,.trophies-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.65rem}
+.achievement-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;display:flex;align-items:flex-start;gap:.7rem;transition:all .2s}
+.achievement-card.locked{opacity:.3;filter:grayscale(.8)}.achievement-card.unlocked{border-color:rgba(255,215,0,.3)}
+.ach-icon{font-size:1.4rem;flex-shrink:0}.ach-info{flex:1;min-width:0}.ach-name{font-size:.82rem;font-weight:700}.ach-desc{font-size:.72rem;color:var(--text2);margin-top:.15rem;line-height:1.4}.ach-xp{font-size:.68rem;color:var(--accent3);font-family:var(--mono);margin-top:.3rem;font-weight:700}
+.trophy-card{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;text-align:center;transition:all .2s}
+.trophy-card.locked{opacity:.3;filter:grayscale(1)}.trophy-card.unlocked{border-color:rgba(255,215,0,.4);box-shadow:0 0 30px rgba(255,215,0,.08)}
+.trophy-icon{font-size:2.2rem;display:block;margin-bottom:.4rem}.trophy-name{font-size:.88rem;font-weight:800;color:var(--accent3)}.trophy-desc{font-size:.72rem;color:var(--text2);margin-top:.25rem}
+
+/* ── LEADERBOARD ── */
+.lb-loading{text-align:center;color:var(--text3);font-family:var(--mono);font-size:.85rem;padding:2rem}
+.lb-list{display:flex;flex-direction:column;gap:.5rem}
+.lb-row{display:flex;align-items:center;gap:.8rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.8rem 1rem;transition:border-color .2s}
+.lb-row:hover{border-color:var(--border2)}.lb-row.lb-me{border-color:rgba(79,255,176,.3);background:rgba(79,255,176,.03)}
+.lb-rank{font-family:var(--mono);font-size:.85rem;font-weight:700;min-width:26px;text-align:center;color:var(--text3)}
+.lb-rank.top1{color:#ffd700;font-size:1.1rem}.lb-rank.top2{color:#c0c0c0;font-size:1rem}.lb-rank.top3{color:#cd7f32;font-size:.95rem}
+.lb-avatar{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.lb-info{flex:1;min-width:0}.lb-name{font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lb-meta{font-size:.72rem;color:var(--text3);font-family:var(--mono);margin-top:1px}
+.lb-you{background:rgba(79,255,176,.15);color:var(--accent);font-size:.7rem;padding:1px 5px;border-radius:4px;font-family:var(--mono);margin-left:.3rem}
+.lb-streak{font-size:.8rem;font-family:var(--mono);font-weight:700;color:#ff9f43;flex-shrink:0}
+.lb-xp-block{text-align:right;flex-shrink:0}.lb-xp{font-family:var(--mono);font-size:.92rem;font-weight:800;color:var(--accent)}.lb-lvl{font-size:.68rem;color:var(--text3);font-family:var(--mono)}
+.lb-empty{text-align:center;color:var(--text3);font-size:.875rem;padding:2rem;font-family:var(--mono)}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.65rem;margin-bottom:1.5rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem .9rem;text-align:center}
+.stat-card.sc-accent{border-color:rgba(79,255,176,.2)}
+.sc-icon{font-size:1.4rem;margin-bottom:.35rem}.sc-val{font-size:1.5rem;font-weight:900;color:var(--accent);letter-spacing:-.5px}
+.sc-lbl{font-size:.72rem;color:var(--text3);font-family:var(--mono);margin-top:.15rem;text-transform:uppercase;letter-spacing:.5px}
+.heatmap-section,.module-stats-section{margin-bottom:1.5rem}
+.heatmap-wrap{display:flex;gap:3px;overflow-x:auto;padding-bottom:.5rem}
+.heatmap-col{display:flex;flex-direction:column;gap:3px}
+.hm-cell{width:13px;height:13px;border-radius:2px;background:var(--surface2)}
+.hm-cell.hm-1{background:rgba(79,255,176,.2)}.hm-cell.hm-2{background:rgba(79,255,176,.4)}.hm-cell.hm-3{background:rgba(79,255,176,.65)}.hm-cell.hm-4{background:var(--accent)}
+.heatmap-legend{display:flex;align-items:center;gap:4px;margin-top:.4rem;font-size:.72rem;color:var(--text3)}
+.hm-box{width:12px;height:12px;border-radius:2px}
+.hm-0{background:var(--surface2)}.hm-1{background:rgba(79,255,176,.2)}.hm-2{background:rgba(79,255,176,.4)}.hm-3{background:rgba(79,255,176,.65)}.hm-4{background:var(--accent)}
+.module-stats-list{display:flex;flex-direction:column;gap:.6rem}
+.mstat-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem}
+.mstat-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}
+.mstat-name{font-size:.85rem;font-weight:600}.mstat-pct{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:700}
+.mstat-bar{height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+.mstat-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .5s ease}
+
+/* Toast + XP popup + Modal */
+#toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;display:flex;flex-direction:column;gap:.5rem;align-items:flex-end}
+.toast{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.7rem .95rem;font-size:.855rem;font-weight:500;max-width:280px;box-shadow:var(--shadow);animation:toast-in .3s ease}
+.toast.toast-badge{border-color:rgba(255,215,0,.3)}.toast.toast-xp{border-color:rgba(123,104,238,.3)}
+@keyframes toast-in{from{opacity:0;transform:translateY(10px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.xp-popup{position:fixed;bottom:90px;right:1.5rem;background:rgba(123,104,238,.9);color:#fff;font-family:var(--mono);font-size:1.05rem;font-weight:700;padding:.45rem .9rem;border-radius:30px;z-index:1000;pointer-events:none;animation:xp-float 1.5s ease forwards}
+@keyframes xp-float{0%{opacity:0;transform:translateY(20px)}20%{opacity:1;transform:translateY(0)}80%{opacity:1;transform:translateY(-20px)}100%{opacity:0;transform:translateY(-40px)}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)}
+.modal-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:2rem;text-align:center;max-width:340px;width:100%;animation:modal-pop .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+@keyframes modal-pop{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-badge-icon{font-size:3.5rem;display:block;margin-bottom:.85rem;animation:badge-bounce .6s .2s both}
+@keyframes badge-bounce{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+.modal-title{font-size:1.2rem;font-weight:900;margin-bottom:.2rem;color:var(--accent)}.modal-sub{font-size:.88rem;color:var(--text2);margin-bottom:.65rem}.modal-xp{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--accent3);margin-bottom:1.1rem}
+.modal-card .btn-primary{max-width:180px;margin:0 auto}
+
+/* Responsive */
+@media(max-width:768px){
+  :root{--sidebar-w:0px}
+  .sidebar{width:260px;transform:translateX(-260px)}.sidebar.open{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,.5)}
+  .sidebar-close{display:block}.topbar-menu{display:block}.main-content{margin-left:0}
+  .view{padding:1rem}.global-progress-card{flex-direction:column;align-items:flex-start}
+  .badges-grid{grid-template-columns:repeat(auto-fill,minmax(95px,1fr))}.stats-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+.btn-secondary{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font);font-size:.9rem;font-weight:600;padding:.75rem 1.5rem;width:100%;transition:all .2s;cursor:pointer;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+  </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     SCREEN: CONFIG (Supabase setup)
-══════════════════════════════════════ -->
+<!-- CONFIG SCREEN -->
 <div id="screen-config" class="screen">
   <div class="setup-bg"><div class="setup-orb orb1"></div><div class="setup-orb orb2"></div><div class="setup-orb orb3"></div></div>
   <div class="setup-container" style="max-width:520px">
@@ -31,41 +265,32 @@
       </div>
       <div class="form-actions">
         <button class="btn-primary" onclick="saveSupabaseConfig()">✓ Conectar e continuar</button>
+        <button class="btn-secondary" onclick="skipConfig()">▶ Usar sem nuvem (somente local)</button>
       </div>
       <div id="cfg-error" class="parse-error" style="display:none"></div>
     </div>
     <div class="setup-footer">
-      <a href="#" onclick="skipConfig()">▶ Usar sem nuvem (somente local)</a>
-      &nbsp;·&nbsp;
       <a href="https://supabase.com" target="_blank">Criar conta Supabase gratuita →</a>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: SETUP
-══════════════════════════════════════ -->
+<!-- SETUP SCREEN -->
 <div id="screen-setup" class="screen">
   <div class="setup-bg"><div class="setup-orb orb1"></div><div class="setup-orb orb2"></div><div class="setup-orb orb3"></div></div>
   <div class="setup-container">
     <div class="setup-logo"><span class="logo-icon">🎯</span><span class="logo-text">StudyQuest</span></div>
     <h1 class="setup-title">Transforme qualquer curso<br><em>em uma jornada épica</em></h1>
     <p class="setup-sub">Cole a grade do seu curso, escolha a tecnologia e acompanhe seu progresso com XP, badges, streaks e troféus.</p>
-
     <div class="setup-form">
-      <!-- Identity -->
       <div class="form-step">
         <label class="form-label"><span class="step-num">01</span> Como você quer aparecer no leaderboard?</label>
         <div class="identity-row">
-          <div class="emoji-preview-wrap">
-            <div id="emoji-preview" class="emoji-preview">⚡</div>
-          </div>
+          <div class="emoji-preview-wrap"><div id="emoji-preview" class="emoji-preview">⚡</div></div>
           <input type="text" id="player-name-input" class="form-input" placeholder="Seu nome ou apelido" maxlength="30">
         </div>
         <div id="emoji-picker-grid" class="emoji-picker-grid"></div>
       </div>
-
-      <!-- Tech -->
       <div class="form-step">
         <label class="form-label"><span class="step-num">02</span> Qual tecnologia você vai estudar?</label>
         <input type="text" id="tech-name" class="form-input" placeholder="Ex: OpenTelemetry, Kubernetes, AWS..." maxlength="40">
@@ -78,23 +303,18 @@
           <span onclick="setTech('AWS')">AWS</span>
         </div>
       </div>
-
-      <!-- API Key -->
       <div class="form-step">
-        <label class="form-label"><span class="step-num">03</span> Anthropic API Key <span class="form-hint">(para parsear a grade automaticamente)</span></label>
+        <label class="form-label"><span class="step-num">03</span> Anthropic API Key <span class="form-hint">(para parsear a grade)</span></label>
         <div class="input-row">
           <input type="password" id="api-key" class="form-input" placeholder="sk-ant-...">
           <button class="btn-icon" onclick="toggleApiKey()">👁</button>
         </div>
-        <p class="form-note">🔒 Fica apenas na <code>sessionStorage</code> do navegador. Nunca enviada para servidores próprios.</p>
+        <p class="form-note">🔒 Fica apenas na <code>sessionStorage</code> do navegador.</p>
       </div>
-
-      <!-- Course content -->
       <div class="form-step">
         <label class="form-label"><span class="step-num">04</span> Cole a grade do curso <span class="form-hint">(qualquer formato)</span></label>
         <textarea id="course-raw" class="form-textarea" placeholder="Cole aqui o conteúdo da grade do curso. Pode ser qualquer formato:&#10;&#10;• Texto copiado da Udemy, Coursera, etc.&#10;• Lista de aulas&#10;• Tabela, JSON, CSV — qualquer coisa&#10;&#10;A IA organiza automaticamente em módulos e aulas."></textarea>
       </div>
-
       <div class="form-actions">
         <button id="btn-parse" class="btn-primary" onclick="parseCourse()">
           <span class="btn-text">✨ Organizar com IA e começar</span>
@@ -103,25 +323,19 @@
       </div>
       <div id="parse-error" class="parse-error" style="display:none"></div>
     </div>
-
     <div class="setup-footer">
-      <a href="#" onclick="loadDemo()">▶ Ver demo com curso de OpenTelemetry</a>
+      <a href="#" onclick="event.preventDefault();loadDemo()">▶ Ver demo com curso de OpenTelemetry</a>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN: TRACKER
-══════════════════════════════════════ -->
+<!-- TRACKER SCREEN -->
 <div id="screen-tracker" class="screen">
-
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <span class="logo-icon">🎯</span><span class="logo-text">StudyQuest</span>
       <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
     </div>
-
-    <!-- User strip -->
     <div class="sidebar-user">
       <div id="sb-emoji" class="sb-big-emoji">⚡</div>
       <div class="sb-user-info">
@@ -129,8 +343,6 @@
         <div class="sb-cloud" id="sb-cloud-status">💾 Local</div>
       </div>
     </div>
-
-    <!-- Player card -->
     <div class="player-card">
       <div class="player-avatar" id="player-avatar">🌱</div>
       <div class="player-info">
@@ -142,20 +354,17 @@
         <div class="player-xp-label" id="xp-label">0 / 100 XP</div>
       </div>
     </div>
-
     <div class="sidebar-stats">
       <div class="sstat"><span class="sstat-val" id="ss-streak">0</span><span class="sstat-lbl">🔥 Streak</span></div>
       <div class="sstat"><span class="sstat-val" id="ss-done">0</span><span class="sstat-lbl">✅ Aulas</span></div>
       <div class="sstat"><span class="sstat-val" id="ss-time">0m</span><span class="sstat-lbl">⏱ Tempo</span></div>
     </div>
-
     <nav class="sidebar-nav">
-      <a class="nav-item active" onclick="showView('tracker')"      href="#">📚 Tracker</a>
-      <a class="nav-item"        onclick="showView('achievements')" href="#">🏆 Conquistas</a>
-      <a class="nav-item"        onclick="showView('leaderboard')"  href="#">🏅 Leaderboard</a>
-      <a class="nav-item"        onclick="showView('stats')"        href="#">📊 Estatísticas</a>
+      <a class="nav-item active" onclick="event.preventDefault();showView('tracker')" href="#">📚 Tracker</a>
+      <a class="nav-item" onclick="event.preventDefault();showView('achievements')" href="#">🏆 Conquistas</a>
+      <a class="nav-item" onclick="event.preventDefault();showView('leaderboard')" href="#">🏅 Leaderboard</a>
+      <a class="nav-item" onclick="event.preventDefault();showView('stats')" href="#">📊 Estatísticas</a>
     </nav>
-
     <div class="sidebar-footer">
       <button class="btn-danger-sm" onclick="confirmReset()">↺ Novo curso</button>
     </div>
@@ -171,7 +380,6 @@
       <div class="topbar-xp"><span id="topbar-xp-badge">⚡ 0 XP</span></div>
     </div>
 
-    <!-- VIEW: TRACKER -->
     <div id="view-tracker" class="view active">
       <div class="global-progress-card">
         <div class="gp-left">
@@ -196,7 +404,6 @@
       <div class="modules-container" id="modules-container"></div>
     </div>
 
-    <!-- VIEW: ACHIEVEMENTS -->
     <div id="view-achievements" class="view">
       <div class="view-header"><h2 class="view-title">🏆 Conquistas</h2><p class="view-sub">Desbloqueie badges completando módulos e marcos especiais</p></div>
       <div class="achievements-section"><h3 class="ach-section-title">🎖 Badges de Módulo</h3><div class="badges-grid" id="module-badges-grid"></div></div>
@@ -204,14 +411,12 @@
       <div class="achievements-section"><h3 class="ach-section-title">🥇 Troféus</h3><div class="trophies-grid" id="trophies-grid"></div></div>
     </div>
 
-    <!-- VIEW: LEADERBOARD -->
     <div id="view-leaderboard" class="view">
       <div class="view-header"><h2 class="view-title">🏅 Leaderboard</h2><p class="view-sub">Os estudantes mais dedicados da comunidade StudyQuest</p></div>
-      <div id="leaderboard-loading" class="lb-loading">Carregando ranking... ⏳</div>
+      <div id="leaderboard-loading" class="lb-loading" style="display:none">Carregando ranking... ⏳</div>
       <div id="leaderboard-list" class="lb-list"></div>
     </div>
 
-    <!-- VIEW: STATS -->
     <div id="view-stats" class="view">
       <div class="view-header"><h2 class="view-title">📊 Estatísticas</h2><p class="view-sub">Seu histórico de estudo detalhado</p></div>
       <div class="stats-grid">
@@ -232,25 +437,763 @@
   </main>
 </div>
 
-<!-- TOASTS + POPUPS -->
 <div id="toast-container"></div>
 <div id="xp-popup" class="xp-popup" style="display:none"><span id="xp-popup-text">+10 XP</span></div>
-
-<!-- BADGE MODAL -->
 <div id="badge-modal" class="modal-overlay" style="display:none" onclick="closeBadgeModal()">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div class="modal-badge-icon" id="modal-badge-icon">🏅</div>
-    <div class="modal-title"  id="modal-title">Badge Desbloqueado!</div>
-    <div class="modal-sub"   id="modal-sub">Você completou o módulo!</div>
-    <div class="modal-xp"    id="modal-xp">+100 XP</div>
+    <div class="modal-title" id="modal-title">Badge Desbloqueado!</div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div class="modal-xp" id="modal-xp">+100 XP</div>
     <button class="btn-primary" onclick="closeBadgeModal()">Continuar →</button>
   </div>
 </div>
 
-<script src="js/storage.js"></script>
-<script src="js/gamification.js"></script>
-<script src="js/parser.js"></script>
-<script src="js/tracker.js"></script>
-<script src="js/app.js"></script>
+<script>
+/**
+ * storage.js
+ * Dual-layer: localStorage (always) + Supabase REST (when configured).
+ * No authentication — user identified by a random UUID stored locally.
+ */
+const Storage = (() => {
+  const VER      = '3';
+  const KEY      = 'studyquest_v' + VER;
+  const CONF_KEY = 'studyquest_conf';
+  const UID_KEY  = 'studyquest_uid';
+
+  // ── USER ID ──────────────────────────────────────────────────────
+  function getUserId() {
+    let uid = localStorage.getItem(UID_KEY);
+    if (!uid) {
+      uid = crypto.randomUUID ? crypto.randomUUID()
+          : Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem(UID_KEY, uid);
+    }
+    return uid;
+  }
+
+  // ── DEFAULTS ─────────────────────────────────────────────────────
+  const defaults = () => ({
+    version: VER,
+    tech: '',
+    modules: [],
+    progress: {},
+    xp: 0,
+    level: 1,
+    streak: 0,
+    streakMax: 0,
+    lastStudyDate: null,
+    studyDays: {},
+    unlockedBadges: [],
+    unlockedAchievements: [],
+    unlockedTrophies: [],
+    displayName: 'Anônimo',
+    avatarEmoji: '⚡',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+
+  // ── LOCAL ────────────────────────────────────────────────────────
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      return raw ? { ...defaults(), ...JSON.parse(raw) } : null;
+    } catch { return null; }
+  }
+
+  function saveLocal(state) {
+    try {
+      state.updatedAt = new Date().toISOString();
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch (e) { console.warn('local save failed', e); }
+  }
+
+  function clearLocal() { localStorage.removeItem(KEY); }
+
+  // ── SUPABASE CONFIG ──────────────────────────────────────────────
+  function getConf() {
+    try { return JSON.parse(localStorage.getItem(CONF_KEY)) || null; }
+    catch { return null; }
+  }
+  function setConf(url, anonKey) {
+    localStorage.setItem(CONF_KEY, JSON.stringify({ url: url.replace(/\/$/, ''), anonKey }));
+  }
+  function hasConf() {
+    const c = getConf();
+    return !!(c && c.url && c.url !== '__skip__' && c.anonKey);
+  }
+
+  // ── SUPABASE REST ────────────────────────────────────────────────
+  async function _req(method, path, body) {
+    const conf = getConf();
+    if (!conf || !hasConf()) return null;
+    const res = await fetch(`${conf.url}/rest/v1/${path}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': conf.anonKey,
+        'Authorization': `Bearer ${conf.anonKey}`,
+        'Prefer': method === 'POST' ? 'resolution=merge-duplicates,return=minimal' : 'return=representation',
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) { const e = await res.json().catch(()=>{}); throw new Error(e?.message || res.status); }
+    const txt = await res.text();
+    return txt ? JSON.parse(txt) : null;
+  }
+
+  async function saveRemote(state) {
+    if (!hasConf()) return;
+    const uid = getUserId();
+    try {
+      await _req('POST', 'user_progress', {
+        user_id:       uid,
+        display_name:  state.displayName || 'Anônimo',
+        avatar_emoji:  state.avatarEmoji || '⚡',
+        tech:          state.tech || '',
+        xp:            state.xp || 0,
+        level:         state.level || 1,
+        streak:        state.streak || 0,
+        streak_max:    state.streakMax || 0,
+        lessons_done:  Object.values(state.progress||{}).filter(p=>p.done).length,
+        total_lessons: (state.modules||[]).reduce((s,m)=>s+m.lessons.length,0),
+        state_json:    state,
+        updated_at:    new Date().toISOString(),
+      });
+    } catch (e) { console.warn('remote save failed', e); }
+  }
+
+  async function fetchLeaderboard(limit = 30) {
+    if (!hasConf()) return [];
+    try {
+      const rows = await _req('GET',
+        `user_progress?select=user_id,display_name,avatar_emoji,tech,xp,level,streak_max,lessons_done,total_lessons&order=xp.desc&limit=${limit}`
+      );
+      return rows || [];
+    } catch { return []; }
+  }
+
+  // ── PUBLIC API ───────────────────────────────────────────────────
+  function init(tech, modules, displayName, avatarEmoji) {
+    const existing = loadLocal() || defaults();
+    const s = {
+      ...existing,
+      tech,
+      modules,
+      // preserve progress if same course
+      progress:     existing.tech === tech ? (existing.progress || {}) : {},
+      displayName:  displayName || existing.displayName || 'Anônimo',
+      avatarEmoji:  avatarEmoji || existing.avatarEmoji || '⚡',
+    };
+    saveLocal(s);
+    return s;
+  }
+
+  function load() { return loadLocal(); }
+
+  async function save(state) {
+    saveLocal(state);
+    await saveRemote(state);
+  }
+
+  function clear() { clearLocal(); }
+
+  return { load, save, init, clear, getConf, setConf, hasConf, getUserId, fetchLeaderboard, defaults };
+})();
+/**
+ * gamification.js — XP, Levels, Badges, Achievements, Trophies
+ */
+const Gamification = (() => {
+
+  const LEVELS = [
+    { level:1,  title:'Iniciante',      xp:0,     avatar:'🌱' },
+    { level:2,  title:'Curioso',        xp:100,   avatar:'🔍' },
+    { level:3,  title:'Aprendiz',       xp:250,   avatar:'📖' },
+    { level:4,  title:'Estudante',      xp:500,   avatar:'✏️' },
+    { level:5,  title:'Praticante',     xp:900,   avatar:'⚙️' },
+    { level:6,  title:'Desenvolvedor',  xp:1400,  avatar:'💻' },
+    { level:7,  title:'Engenheiro',     xp:2000,  avatar:'🔧' },
+    { level:8,  title:'Especialista',   xp:2800,  avatar:'🎯' },
+    { level:9,  title:'Expert',         xp:3800,  avatar:'⚡' },
+    { level:10, title:'Mestre',         xp:5000,  avatar:'🏆' },
+    { level:11, title:'Sênior',         xp:6500,  avatar:'👑' },
+    { level:12, title:'Arquiteto',      xp:8500,  avatar:'🌟' },
+    { level:13, title:'Principal',      xp:11000, avatar:'💎' },
+    { level:14, title:'Lenda',          xp:14000, avatar:'🦄' },
+    { level:15, title:'Grand Master',   xp:18000, avatar:'🌌' },
+  ];
+
+  const XP = {
+    video: 10, hands: 20, quiz: 25,
+    module: 100, streak_3: 50, streak_7: 150, streak_14: 350,
+    halfway: 200, course_done: 500,
+  };
+
+  const SPECIAL = [
+    { id:'first_blood', icon:'🩸', name:'First Blood',      desc:'Complete sua primeira aula',       xp:20,
+      check: s => Object.values(s.progress).filter(p=>p.done).length >= 1 },
+    { id:'streak_3',    icon:'🔥', name:'Em Chamas',        desc:'3 dias seguidos estudando',        xp:50,
+      check: s => (s.streak||0) >= 3 },
+    { id:'streak_7',    icon:'⚡', name:'Semana Imparável', desc:'7 dias de streak',                 xp:150,
+      check: s => (s.streak||0) >= 7 },
+    { id:'streak_14',   icon:'🌪️', name:'Força da Rotina', desc:'14 dias de streak',                xp:350,
+      check: s => (s.streak||0) >= 14 },
+    { id:'halfway',     icon:'🏁', name:'Meio Caminho',     desc:'50% do curso concluído',           xp:200,
+      check: (s, mods) => { const t=mods.reduce((a,m)=>a+m.lessons.length,0); const d=Object.values(s.progress).filter(p=>p.done).length; return t>0&&d>=Math.floor(t/2); } },
+    { id:'quiz_master', icon:'🧠', name:'Quiz Master',      desc:'Complete todos os quizzes',        xp:200,
+      check: (s, mods) => { const q=mods.flatMap(m=>m.lessons.filter(l=>l.type==='quiz')); return q.length>0&&q.every(l=>s.progress[String(l.id)]?.done); } },
+    { id:'hands_on',    icon:'🛠️', name:'Mão na Massa',    desc:'Complete 5 aulas hands-on',        xp:100,
+      check: (s, mods) => { const h=mods.flatMap(m=>m.lessons.filter(l=>l.type==='hands')); return h.filter(l=>s.progress[String(l.id)]?.done).length>=5; } },
+    { id:'night_owl',   icon:'🦉', name:'Coruja Noturna',   desc:'Estude após 22h',                  xp:30,
+      check: s => Object.values(s.progress).some(p=>{ if(!p.doneAt)return false; const h=new Date(p.doneAt).getHours(); return h>=22||h<3; }) },
+    { id:'early_bird',  icon:'🐦', name:'Madrugador',       desc:'Estude antes das 7h',              xp:30,
+      check: s => Object.values(s.progress).some(p=>{ if(!p.doneAt)return false; const h=new Date(p.doneAt).getHours(); return h>=5&&h<7; }) },
+    { id:'speed_run',   icon:'🚀', name:'Speed Run',        desc:'Complete 10 aulas em um dia',      xp:150,
+      check: s => { const d={}; Object.values(s.progress).forEach(p=>{if(!p.done||!p.doneAt)return; const k=p.doneAt.slice(0,10); d[k]=(d[k]||0)+1;}); return Object.values(d).some(v=>v>=10); } },
+    { id:'completionist',icon:'💯',name:'Completionist',    desc:'Finalize 100% do curso',           xp:500,
+      check: (s, mods) => { const t=mods.reduce((a,m)=>a+m.lessons.length,0); return t>0&&Object.values(s.progress).filter(p=>p.done).length>=t; } },
+  ];
+
+  const TROPHIES = [
+    { id:'bronze',   icon:'🥉', name:'Troféu Bronze',  desc:'Complete 25% do curso', xp:100,
+      check: (s,m) => { const t=m.reduce((a,x)=>a+x.lessons.length,0); return t>0&&Object.values(s.progress).filter(p=>p.done).length>=Math.floor(t*.25); } },
+    { id:'silver',   icon:'🥈', name:'Troféu Prata',   desc:'Complete 50% do curso', xp:250,
+      check: (s,m) => { const t=m.reduce((a,x)=>a+x.lessons.length,0); return t>0&&Object.values(s.progress).filter(p=>p.done).length>=Math.floor(t*.5);  } },
+    { id:'gold',     icon:'🥇', name:'Troféu Ouro',    desc:'Complete 75% do curso', xp:400,
+      check: (s,m) => { const t=m.reduce((a,x)=>a+x.lessons.length,0); return t>0&&Object.values(s.progress).filter(p=>p.done).length>=Math.floor(t*.75); } },
+    { id:'platinum', icon:'💎', name:'Troféu Platina', desc:'Complete 100% do curso',xp:1000,
+      check: (s,m) => { const t=m.reduce((a,x)=>a+x.lessons.length,0); return t>0&&Object.values(s.progress).filter(p=>p.done).length>=t; } },
+  ];
+
+  function getLevelInfo(xp) {
+    let cur = LEVELS[0], nxt = LEVELS[1];
+    for (let i=LEVELS.length-1;i>=0;i--) { if(xp>=LEVELS[i].xp){cur=LEVELS[i];nxt=LEVELS[i+1]||null;break;} }
+    const inLvl   = nxt ? xp - cur.xp : 0;
+    const forNext = nxt ? nxt.xp - cur.xp : 0;
+    const pct     = nxt ? Math.round(inLvl/forNext*100) : 100;
+    return { current:cur, next:nxt, xpInLevel:inLvl, xpForNext:forNext, pct };
+  }
+
+  function getLessonXP(lesson) {
+    return lesson.type==='quiz' ? XP.quiz : lesson.type==='hands' ? XP.hands : XP.video;
+  }
+
+  function getModuleBadge(mod, idx) {
+    const icons = ['🔭','🔧','⚙️','📡','🏗️','📐','🔄','🐛','🎯','🧪','🌐','💡','🛰️','🔬','🎓'];
+    return { id:'module_'+mod.id, icon:mod.icon||icons[idx%icons.length], name:mod.title+' — Concluído', xp:XP.module };
+  }
+
+  function updateStreak(state) {
+    const today = new Date().toISOString().slice(0,10);
+    const yest  = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    if (state.lastStudyDate === today) return state;
+    state.streak = state.lastStudyDate === yest ? (state.streak||0)+1 : 1;
+    state.streakMax = Math.max(state.streak, state.streakMax||0);
+    state.lastStudyDate = today;
+    state.studyDays = state.studyDays || {};
+    state.studyDays[today] = (state.studyDays[today]||0)+1;
+    return state;
+  }
+
+  function checkUnlocks(state, modules) {
+    const newBadges=[], newAch=[], newTrophies=[];
+    modules.forEach((mod,i) => {
+      const bid = 'module_'+mod.id;
+      if (state.unlockedBadges.includes(bid)) return;
+      if (mod.lessons.every(l=>state.progress[String(l.id)]?.done)) {
+        state.unlockedBadges.push(bid);
+        const b = getModuleBadge(mod,i); state.xp += b.xp; newBadges.push(b);
+      }
+    });
+    SPECIAL.forEach(a => {
+      if (state.unlockedAchievements.includes(a.id)) return;
+      if (a.check(state,modules)) { state.unlockedAchievements.push(a.id); state.xp+=a.xp; newAch.push(a); }
+    });
+    TROPHIES.forEach(t => {
+      if (state.unlockedTrophies.includes(t.id)) return;
+      if (t.check(state,modules)) { state.unlockedTrophies.push(t.id); state.xp+=t.xp; newTrophies.push(t); }
+    });
+    state.level = getLevelInfo(state.xp).current.level;
+    return { state, newBadges, newAch, newTrophies };
+  }
+
+  return { LEVELS, XP, SPECIAL, TROPHIES, getLevelInfo, getLessonXP, getModuleBadge, updateStreak, checkUnlocks };
+})();
+/**
+ * parser.js — Claude API course parser + demo data
+ */
+const Parser = (() => {
+
+  const SYSTEM = `You are a course curriculum parser. Convert any raw course text into structured JSON.
+
+Rules:
+1. Group lessons into logical modules. Use existing sections if present, otherwise infer from topics.
+2. Each module: id (slug), title, icon (single emoji), lessons array.
+3. Each lesson: id (unique string/number), name, time (minutes integer, 0 if unknown), type (video|quiz|hands).
+4. Type rules: "quiz/test/teste/exam" → quiz | "hands-on/lab/prática/exercise" → hands | else → video.
+5. Output ONLY valid JSON. Root: { "tech": "<inferred or empty>", "modules": [...] }
+6. Do not translate or modify lesson names. Max 20 modules.`;
+
+  async function parse(rawText, apiKey, techHint) {
+    const prompt = (techHint ? `Technology: ${techHint}\n\n` : '') + `Course content:\n\n${rawText}`;
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:4000, system:SYSTEM, messages:[{role:'user',content:prompt}] }),
+    });
+    if (!res.ok) { const e=await res.json().catch(()=>{}); throw new Error(e?.error?.message||`API ${res.status}`); }
+    const data = await res.json();
+    const text = data.content?.find(b=>b.type==='text')?.text||'';
+    const clean = text.replace(/^```[a-z]*\n?/i,'').replace(/\n?```$/i,'').trim();
+    let parsed;
+    try { parsed = JSON.parse(clean); } catch { throw new Error('IA retornou formato inválido. Tente novamente.'); }
+    if (!Array.isArray(parsed.modules)) throw new Error('Estrutura inválida: "modules" não encontrado.');
+    let ctr=1; const used=new Set();
+    parsed.modules = parsed.modules.map((mod,mi) => {
+      mod.id   = mod.id   || `module_${mi+1}`;
+      mod.icon = mod.icon || '📚';
+      mod.lessons = (mod.lessons||[]).map(l => {
+        let lid = String(l.id||ctr); while(used.has(lid)) lid=String(++ctr); used.add(lid); ctr++;
+        return { id:lid, name:l.name||'Aula', time:parseInt(l.time)||0, type:['video','quiz','hands'].includes(l.type)?l.type:'video' };
+      });
+      return mod;
+    }).filter(m=>m.lessons.length>0);
+    return parsed;
+  }
+
+  const DEMO = {
+    tech: 'OpenTelemetry',
+    modules: [
+      { id:'intro',          icon:'🚀', title:'Introdução ao Curso',
+        lessons:[{id:'1',name:'About this Course',time:3,type:'video'},{id:'2',name:'Your Instructor',time:1,type:'video'},{id:'3',name:'My Teaching Style',time:3,type:'video'},{id:'4',name:'Course Outline',time:5,type:'video'},{id:'5',name:'Course Resources',time:1,type:'video'}]},
+      { id:'observability',  icon:'🔭', title:'Fundamentos de Observabilidade',
+        lessons:[{id:'6',name:'What is Observability?',time:2,type:'video'},{id:'7',name:'Telemetry Signals',time:2,type:'video'},{id:'8',name:'Monitoring Vs Observability',time:4,type:'video'},{id:'9',name:'Reliability Metrics',time:3,type:'video'},{id:'10',name:'Observability Solutions',time:2,type:'video'},{id:'11',name:'Recap',time:3,type:'video'},{id:'q1',name:'Observability Quiz',time:0,type:'quiz'}]},
+      { id:'environment',    icon:'⚙️', title:'Ambiente de Aprendizado',
+        lessons:[{id:'12',name:'Introduction',time:2,type:'video'},{id:'13',name:'Setup Learning Environment',time:17,type:'video'},{id:'14',name:'About hello-telemetry',time:7,type:'video'},{id:'15',name:'About OpenTelemetry Demo',time:7,type:'video'},{id:'16',name:'OpenTelemetry Demo Operation',time:4,type:'video'},{id:'17',name:'Recap',time:4,type:'video'},{id:'q2',name:'Learning Environment Quiz',time:0,type:'quiz'}]},
+      { id:'instrumentation',icon:'🔧', title:'Instrumentação',
+        lessons:[{id:'18',name:'About OpenTelemetry',time:4,type:'video'},{id:'19',name:'Instrumentation',time:5,type:'video'},{id:'20',name:'APIs and SDKs',time:4,type:'video'},{id:'21',name:'Zero-code Instrumentation',time:3,type:'video'},{id:'22',name:'eBPF-based Instrumentation',time:4,type:'video'},{id:'23',name:'Hands-on Zero-code — Java',time:14,type:'hands'},{id:'24',name:'Hands-on Zero-code — Python',time:9,type:'hands'},{id:'25',name:'Zero-code Summary',time:1,type:'video'},{id:'26',name:'Zero-code — OTel Demo',time:3,type:'video'},{id:'27',name:'Code-based Instrumentation',time:2,type:'video'},{id:'28',name:'OTel Example Apps',time:1,type:'video'},{id:'29',name:'Recap',time:5,type:'video'},{id:'q3',name:'Instrumentation Quiz',time:0,type:'quiz'}]},
+      { id:'signals',        icon:'📡', title:'Telemetry Signals',
+        lessons:[{id:'30',name:'Signals Introduction',time:1,type:'video'},{id:'31',name:'Metrics',time:3,type:'video'},{id:'32',name:'Metrics — Kinds',time:3,type:'video'},{id:'33',name:'Hands-on Metrics',time:2,type:'hands'},{id:'34',name:'Hands-on Metrics — Java',time:17,type:'hands'},{id:'35',name:'Hands-on Metrics — Python',time:11,type:'hands'},{id:'36',name:'Hands-on Metrics — OTel Demo',time:10,type:'hands'},{id:'37',name:'Traces',time:2,type:'video'},{id:'38',name:'Traces — Span Data',time:5,type:'video'},{id:'39',name:'Hands-on Traces — Java',time:12,type:'hands'},{id:'40',name:'Hands-on Traces — Python',time:8,type:'hands'},{id:'41',name:'Traces — Context Propagation',time:6,type:'video'},{id:'42',name:'Hands-on — Context Propagation',time:12,type:'hands'},{id:'43',name:'Hands-on Traces — OTel Demo',time:6,type:'hands'},{id:'44',name:'Logs',time:4,type:'video'},{id:'45',name:'Hands-on Logs — Java',time:11,type:'hands'},{id:'46',name:'Hands-on Logs — Python',time:7,type:'hands'},{id:'47',name:'Hands-on Logs — OTel Demo',time:5,type:'hands'},{id:'48',name:'Hands-on — Zero-code + Code-based',time:11,type:'hands'},{id:'49',name:'Baggage',time:4,type:'video'},{id:'50',name:'Hands-on Baggage',time:9,type:'hands'},{id:'51',name:'Profiling',time:3,type:'video'},{id:'52',name:'Recap',time:7,type:'video'},{id:'q4',name:'Telemetry Signals Quiz',time:0,type:'quiz'}]},
+      { id:'sdk',            icon:'🏗️', title:'SDK Architecture & Composability',
+        lessons:[{id:'53',name:'Introduction',time:1,type:'video'},{id:'54',name:'SDK Architecture',time:6,type:'video'},{id:'55',name:'SDK and Plugins',time:4,type:'video'},{id:'56',name:'SDK Composability',time:4,type:'video'},{id:'57',name:'SDK Configuration',time:5,type:'video'},{id:'58',name:'Choosing the right SDK version',time:4,type:'video'},{id:'59',name:'Recap',time:6,type:'video'},{id:'q5',name:'SDK Quiz',time:0,type:'quiz'}]},
+      { id:'standards',      icon:'📐', title:'Standards — OTLP & Semantic Conventions',
+        lessons:[{id:'60',name:'Introduction',time:2,type:'video'},{id:'61',name:'OTLP',time:2,type:'video'},{id:'62',name:'Semantic Conventions',time:6,type:'video'},{id:'63',name:'Recap',time:4,type:'video'},{id:'q6',name:'Standards Quiz',time:0,type:'quiz'}]},
+      { id:'collector',      icon:'🔄', title:'OpenTelemetry Collector',
+        lessons:[{id:'64',name:'Purpose',time:4,type:'video'},{id:'65',name:'Installation',time:7,type:'video'},{id:'66',name:'Configuration',time:3,type:'video'},{id:'67',name:'Receiver',time:3,type:'video'},{id:'68',name:'Processor',time:2,type:'video'},{id:'69',name:'Exporter',time:2,type:'video'},{id:'70',name:'Extensions',time:2,type:'video'},{id:'71',name:'Service & Pipelines',time:3,type:'video'},{id:'72',name:'Hands-on Collector — mysql',time:7,type:'hands'},{id:'73',name:'Deployment Patterns',time:6,type:'video'},{id:'74',name:'Scaling Strategies',time:5,type:'video'},{id:'75',name:'SDK Exporters vs Collector Exporters',time:2,type:'video'},{id:'76',name:'Recap',time:7,type:'video'},{id:'q7',name:'Collector Quiz',time:0,type:'quiz'}]},
+      { id:'debugging',      icon:'🐛', title:'Debugging & Maintenance',
+        lessons:[{id:'77',name:'Introduction',time:3,type:'video'},{id:'78',name:'Troubleshooting Context Propagation',time:6,type:'video'},{id:'79',name:'Debugging Collector Pipelines',time:13,type:'video'},{id:'80',name:'Error Handling and Data Loss',time:8,type:'video'},{id:'81',name:'Schema Management',time:7,type:'video'},{id:'82',name:'Recap',time:4,type:'video'},{id:'q8',name:'Debugging Quiz',time:0,type:'quiz'}]},
+      { id:'sre',            icon:'🎯', title:'SRE & Reliability',
+        lessons:[{id:'83',name:'Introduction',time:1,type:'video'},{id:'84',name:'SRE Origins',time:5,type:'video'},{id:'85',name:'Reliability Targets',time:2,type:'video'},{id:'86',name:'SLIs, SLOs, and SLAs',time:4,type:'video'}]},
+    ]
+  };
+
+  return { parse, DEMO };
+})();
+/**
+ * tracker.js — All rendering: modules, progress, achievements, stats, leaderboard.
+ */
+const Tracker = (() => {
+  const COLORS = ['#4fffb0','#7b68ee','#ffd700','#4dc9ff','#ff6b6b','#ff9f43','#a29bfe','#00cec9','#fd79a8','#6c5ce7','#fdcb6e','#81ecec','#e17055','#74b9ff','#55efc4'];
+  const _exp = new Set();
+
+  const fmt = m => !m?'':m<60?m+'m':`${Math.floor(m/60)}h${m%60?' '+(m%60)+'m':''}`;
+  const el  = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+
+  function injectSVGDefs() {
+    const s = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    s.style.cssText='width:0;height:0;position:absolute';
+    s.innerHTML=`<defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#7b68ee"/><stop offset="100%" stop-color="#4fffb0"/></linearGradient></defs>`;
+    document.body.prepend(s);
+  }
+
+  function renderModules(state) {
+    const c = document.getElementById('modules-container');
+    if (!c) return;
+    c.innerHTML = '';
+    (state.modules||[]).forEach((mod,mi) => {
+      const color   = COLORS[mi%COLORS.length];
+      const total   = mod.lessons.length;
+      const done    = mod.lessons.filter(l=>state.progress[String(l.id)]?.done).length;
+      const pct     = total ? Math.round(done/total*100) : 0;
+      const unlocked= state.unlockedBadges.includes('module_'+mod.id);
+      const badge   = Gamification.getModuleBadge(mod,mi);
+      const isExp   = _exp.has(mod.id);
+
+      const card = document.createElement('div');
+      card.className = `module-card${pct===100?' mod-complete':''}${isExp?' expanded':''}`;
+      card.id = `mc-${mod.id}`;
+      card.innerHTML = `
+        <div class="module-header" onclick="Tracker.toggleModule('${mod.id}')">
+          <div class="mod-icon" style="background:${color}18;border-color:${color}33">${mod.icon||'📚'}</div>
+          <div class="mod-meta">
+            <div class="mod-tag">Módulo ${mi+1} · ${done}/${total}</div>
+            <div class="mod-title">${mod.title}</div>
+          </div>
+          <div class="mod-badge-slot" title="${badge.name}" style="opacity:${unlocked?1:0}">${badge.icon}</div>
+          <div class="mod-progress">
+            <div class="mod-bar"><div class="mod-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${color}88,${color})"></div></div>
+            <span class="mod-pct">${pct}%</span>
+          </div>
+          <span class="mod-toggle">▾</span>
+        </div>
+        <div class="lessons-list">
+          ${mod.lessons.map((l,li)=>{
+            const done2 = !!state.progress[String(l.id)]?.done;
+            const tag   = l.type==='quiz'?'<span class="tag-pill tag-quiz">quiz</span>':l.type==='hands'?'<span class="tag-pill tag-hands">hands-on</span>':'<span class="tag-pill tag-video">vídeo</span>';
+            return `<div class="lesson-row${done2?' lesson-done':''}" onclick="AppCore.toggleLesson('${l.id}')">
+              <div class="lesson-chk">${done2?'✓':''}</div>
+              <span class="lesson-num">${li+1}.</span>
+              <span class="lesson-name">${l.name}</span>
+              <div class="lesson-tags">${l.time?`<span class="lesson-time">${l.time}m</span>`:''} ${tag}</div>
+            </div>`;
+          }).join('')}
+        </div>`;
+      c.appendChild(card);
+    });
+  }
+
+  function renderGlobalProgress(state) {
+    const mods     = state.modules||[];
+    const total    = mods.reduce((s,m)=>s+m.lessons.length,0);
+    const done     = Object.values(state.progress||{}).filter(p=>p.done).length;
+    const pct      = total ? Math.round(done/total*100) : 0;
+    const allLess  = mods.flatMap(m=>m.lessons);
+    const tMins    = allLess.reduce((s,l)=>s+(l.time||0),0);
+    const dMins    = allLess.filter(l=>state.progress[String(l.id)]?.done).reduce((s,l)=>s+(l.time||0),0);
+    el('gp-pct', pct+'%'); el('gp-sub',`${done} de ${total} aulas concluídas`); el('gp-ring-label',pct+'%');
+    el('gp-time-done', fmt(dMins)||'0m'); el('gp-time-left', fmt(tMins-dMins)||'0m');
+    const ring = document.getElementById('ring-fill');
+    if (ring) { ring.style.strokeDashoffset = 213.6-(213.6*pct/100); ring.setAttribute('stroke', pct===100?'#4fffb0':'url(#ringGrad)'); }
+  }
+
+  function renderSidebar(state) {
+    const info = Gamification.getLevelInfo(state.xp||0);
+    el('player-level-badge','Nível '+info.current.level); el('player-title-text',info.current.title);
+    const av = document.getElementById('player-avatar'); if(av) av.textContent = info.current.avatar;
+    const xf = document.getElementById('xp-bar-fill'); if(xf) xf.style.width=info.pct+'%';
+    el('xp-label', info.next?`${info.xpInLevel} / ${info.xpForNext} XP`:`${state.xp} XP (MAX)`);
+    el('ss-streak',(state.streak||0)+(state.streak>=3?'🔥':'')); el('topbar-tech-name',state.tech||'Curso');
+    el('topbar-xp-badge',`⚡ ${state.xp||0} XP`);
+    const mods=state.modules||[], allLess=mods.flatMap(m=>m.lessons);
+    const done=Object.values(state.progress||{}).filter(p=>p.done).length;
+    const dMins=allLess.filter(l=>state.progress[String(l.id)]?.done).reduce((s,l)=>s+(l.time||0),0);
+    el('ss-done',done); el('ss-time',fmt(dMins)||'0m');
+    // user identity
+    el('sb-display-name', state.displayName||'Anônimo');
+    const emo = document.getElementById('sb-emoji'); if(emo) emo.textContent = state.avatarEmoji||'⚡';
+    const cloudEl = document.getElementById('sb-cloud-status');
+    if(cloudEl) cloudEl.textContent = Storage.hasConf() ? '☁️ Sync ativo' : '💾 Local';
+  }
+
+  function renderAchievements(state) {
+    const mods = state.modules||[];
+    const bg = document.getElementById('module-badges-grid');
+    if (bg) bg.innerHTML = mods.map((mod,i)=>{
+      const b=Gamification.getModuleBadge(mod,i), u=state.unlockedBadges.includes('module_'+mod.id);
+      return `<div class="badge-card ${u?'unlocked':'locked'}">${u?'<div class="badge-unlocked-shine"></div>':''}
+        <span class="badge-icon">${b.icon}</span><div class="badge-name">${mod.title}</div>
+        <div class="badge-desc">Módulo ${i+1} concluído</div><div class="badge-xp">+${b.xp} XP</div></div>`;
+    }).join('');
+    const sg = document.getElementById('special-achievements-grid');
+    if (sg) sg.innerHTML = Gamification.SPECIAL.map(a=>{
+      const u=state.unlockedAchievements.includes(a.id);
+      return `<div class="achievement-card ${u?'unlocked':'locked'}"><div class="ach-icon">${a.icon}</div>
+        <div class="ach-info"><div class="ach-name">${a.name}</div><div class="ach-desc">${a.desc}</div><div class="ach-xp">+${a.xp} XP</div></div></div>`;
+    }).join('');
+    const tg = document.getElementById('trophies-grid');
+    if (tg) tg.innerHTML = Gamification.TROPHIES.map(t=>{
+      const u=state.unlockedTrophies.includes(t.id);
+      return `<div class="trophy-card ${u?'unlocked':'locked'}"><span class="trophy-icon">${t.icon}</span>
+        <div class="trophy-name">${t.name}</div><div class="trophy-desc">${t.desc}</div><div class="badge-xp">+${t.xp} XP</div></div>`;
+    }).join('');
+  }
+
+  function renderStats(state) {
+    const mods=state.modules||[];
+    const info=Gamification.getLevelInfo(state.xp||0);
+    const dMins=mods.flatMap(m=>m.lessons).filter(l=>state.progress[String(l.id)]?.done).reduce((s,l)=>s+(l.time||0),0);
+    el('sc-xp',state.xp||0); el('sc-level',info.current.level); el('sc-streak',state.streak||0);
+    el('sc-streak-max',state.streakMax||0); el('sc-time',fmt(dMins)||'0h'); el('sc-days',Object.keys(state.studyDays||{}).length);
+    _renderHeatmap(state);
+    const ml = document.getElementById('module-stats-list');
+    if (ml) ml.innerHTML = mods.map(mod=>{
+      const t=mod.lessons.length, d=mod.lessons.filter(l=>state.progress[String(l.id)]?.done).length, p=t?Math.round(d/t*100):0;
+      return `<div class="mstat-row"><div class="mstat-top"><span class="mstat-name">${mod.icon} ${mod.title}</span><span class="mstat-pct">${d}/${t} · ${p}%</span></div>
+        <div class="mstat-bar"><div class="mstat-fill" style="width:${p}%"></div></div></div>`;
+    }).join('');
+  }
+
+  function _renderHeatmap(state) {
+    const hm = document.getElementById('heatmap'); if (!hm) return;
+    const sd=state.studyDays||{}, max=Math.max(...Object.values(sd),1);
+    const days=[]; for(let i=83;i>=0;i--){const d=new Date(Date.now()-i*86400000);days.push(d.toISOString().slice(0,10));}
+    hm.innerHTML='';
+    for(let w=0;w<12;w++){const col=document.createElement('div');col.className='heatmap-col';
+      for(let d=0;d<7;d++){const date=days[w*7+d],cnt=sd[date]||0,lvl=cnt===0?0:Math.min(4,Math.ceil(cnt/max*4));
+        const cell=document.createElement('div');cell.className=`hm-cell hm-${lvl}`;cell.title=`${date}: ${cnt} aulas`;col.appendChild(cell);}
+      hm.appendChild(col);}
+  }
+
+  async function renderLeaderboard(state) {
+    const list = document.getElementById('leaderboard-list');
+    const load = document.getElementById('leaderboard-loading');
+    if (!list) return;
+    if (!Storage.hasConf()) {
+      if (load) load.textContent = '⚠️ Leaderboard requer configuração do Supabase.';
+      return;
+    }
+    if (load) load.style.display='block'; list.innerHTML='';
+    const rows = await Storage.fetchLeaderboard(30);
+    if (load) load.style.display='none';
+    if (!rows.length) { list.innerHTML='<div class="lb-empty">Ninguém no leaderboard ainda. Seja o primeiro! 🚀</div>'; return; }
+    const myUid = Storage.getUserId();
+    list.innerHTML = rows.map((r,i)=>{
+      const rank   = i+1;
+      const isMe   = r.user_id === myUid;
+      const medal  = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
+      const rClass = rank<=3?`top${rank}`:'';
+      const pct    = r.total_lessons>0?Math.round(r.lessons_done/r.total_lessons*100):0;
+      return `<div class="lb-row${isMe?' lb-me':''}">
+        <div class="lb-rank ${rClass}">${medal}</div>
+        <div class="lb-avatar">${r.avatar_emoji||'⚡'}</div>
+        <div class="lb-info">
+          <div class="lb-name">${r.display_name||'Anônimo'}${isMe?' <span class="lb-you">(você)</span>':''}</div>
+          <div class="lb-meta">${r.tech||'—'} · Nv.${r.level||1} · ${pct}% concluído</div>
+        </div>
+        ${r.streak_max>=3?`<div class="lb-streak">🔥 ${r.streak_max}</div>`:''}
+        <div class="lb-xp-block"><div class="lb-xp">${r.xp||0} XP</div><div class="lb-lvl">Nível ${r.level||1}</div></div>
+      </div>`;
+    }).join('');
+  }
+
+  function toggleModule(id) {
+    const c=document.getElementById(`mc-${id}`); if(!c) return;
+    _exp.has(id)?(_exp.delete(id),c.classList.remove('expanded')):(_exp.add(id),c.classList.add('expanded'));
+  }
+
+  function renderAll(state) {
+    renderModules(state); renderGlobalProgress(state); renderSidebar(state);
+    renderAchievements(state); renderStats(state);
+  }
+
+  return { injectSVGDefs, renderAll, renderModules, renderGlobalProgress, renderSidebar, renderAchievements, renderStats, renderLeaderboard, toggleModule };
+})();
+/**
+ * app.js — Main orchestration. No auth. User identified by random UUID.
+ */
+
+let _state         = null;
+let _pendingModals = [];
+let _sidebarOpen   = false;
+
+// ── BOOT ──────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  Tracker.injectSVGDefs();
+
+  const conf = Storage.getConf();
+  if (!conf) {
+    _showScreen('config');
+    return;
+  }
+  _start();
+});
+
+function _start() {
+  _state = Storage.load();
+  if (_state && _state.modules && _state.modules.length > 0) {
+    _showTracker();
+  } else {
+    _showScreen('setup');
+  }
+}
+
+// ── SCREENS ───────────────────────────────────────────────────────
+function _showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById('screen-'+name);
+  if (s) s.classList.add('active');
+}
+
+function _showTracker() {
+  _showScreen('tracker');
+  Tracker.renderAll(_state);
+}
+
+// ── CONFIG SCREEN ─────────────────────────────────────────────────
+function saveSupabaseConfig() {
+  const url   = (document.getElementById('cfg-url')?.value||'').trim().replace(/\/$/,'');
+  const key   = (document.getElementById('cfg-key')?.value||'').trim();
+  const errEl = document.getElementById('cfg-error');
+  errEl.style.display = 'none';
+  if (!url.startsWith('https://')) { errEl.textContent='⚠️ URL deve começar com https://'; errEl.style.display='block'; return; }
+  if (key.length < 20)             { errEl.textContent='⚠️ Anon key parece inválida.';      errEl.style.display='block'; return; }
+  Storage.setConf(url, key);
+  _start();
+}
+
+function skipConfig() {
+  Storage.setConf('__skip__', '__skip__');
+  _start();
+}
+
+// ── SETUP SCREEN ──────────────────────────────────────────────────
+function setTech(name) { document.getElementById('tech-name').value = name; }
+
+function toggleApiKey() {
+  const inp = document.getElementById('api-key');
+  inp.type  = inp.type === 'password' ? 'text' : 'password';
+}
+
+async function parseCourse() {
+  const tech   = (document.getElementById('tech-name').value||'').trim();
+  const apiKey = (document.getElementById('api-key').value||'').trim();
+  const raw    = (document.getElementById('course-raw').value||'').trim();
+  const errEl  = document.getElementById('parse-error');
+  const btn    = document.getElementById('btn-parse');
+  errEl.style.display = 'none';
+  if (!tech)               { _showErr(errEl,'⚠️ Informe a tecnologia (campo 01).'); return; }
+  if (!apiKey)             { _showErr(errEl,'⚠️ Informe sua Anthropic API Key (campo 02).'); return; }
+  if (raw.length < 20)     { _showErr(errEl,'⚠️ Cole a grade do curso no campo 03.'); return; }
+  sessionStorage.setItem('sq_api', apiKey);
+  btn.disabled=true; btn.querySelector('.btn-text').style.display='none'; btn.querySelector('.btn-loader').style.display='inline';
+  try {
+    const parsed = await Parser.parse(raw, apiKey, tech);
+    const name   = (document.getElementById('player-name-input')?.value||'').trim() || 'Anônimo';
+    const emoji  = _selectedEmoji || '⚡';
+    _state = Storage.init(tech||parsed.tech||'Curso', parsed.modules, name, emoji);
+    await Storage.save(_state);
+    _showTracker();
+  } catch(e) {
+    _showErr(errEl, '❌ '+(e.message||'Erro desconhecido. Verifique sua API Key.'));
+  } finally {
+    btn.disabled=false; btn.querySelector('.btn-text').style.display='inline'; btn.querySelector('.btn-loader').style.display='none';
+  }
+}
+
+function _showErr(el, msg) { el.textContent=msg; el.style.display='block'; }
+
+function loadDemo() {
+  const name  = (document.getElementById('player-name-input')?.value||'').trim() || 'Anônimo';
+  const emoji = _selectedEmoji || '⚡';
+  _state = Storage.init(Parser.DEMO.tech, Parser.DEMO.modules, name, emoji);
+  Storage.save(_state);
+  _showTracker();
+}
+
+// Emoji picker
+let _selectedEmoji = '⚡';
+const AVATARS = ['⚡','🔥','🚀','🧠','💎','🦊','🐉','👾','🌟','🎯','⚔️','🛡️','🦁','🐺','🦅'];
+function initEmojiPicker() {
+  const grid = document.getElementById('emoji-picker-grid');
+  if (!grid) return;
+  grid.innerHTML = AVATARS.map(e =>
+    `<span class="emoji-opt${e===_selectedEmoji?' selected':''}" onclick="selectEmoji('${e}')">${e}</span>`
+  ).join('');
+}
+function selectEmoji(e) {
+  _selectedEmoji = e;
+  document.querySelectorAll('.emoji-opt').forEach(el => el.classList.toggle('selected', el.textContent===e));
+  const prev = document.getElementById('emoji-preview'); if(prev) prev.textContent = e;
+}
+
+// ── LESSON TOGGLE ─────────────────────────────────────────────────
+const AppCore = {
+  async toggleLesson(lessonId) {
+    if (!_state) return;
+    const lid    = String(lessonId);
+    const wasDone= !!_state.progress[lid]?.done;
+
+    if (!wasDone) {
+      _state.progress[lid] = { done:true, doneAt:new Date().toISOString() };
+      const lesson = (_state.modules||[]).flatMap(m=>m.lessons).find(l=>String(l.id)===lid);
+      if (lesson) { const xp=Gamification.getLessonXP(lesson); _state.xp=(_state.xp||0)+xp; showXpPopup('+'+xp+' XP'); }
+      _state = Gamification.updateStreak(_state);
+      const {state:ns, newBadges, newAch, newTrophies} = Gamification.checkUnlocks(_state, _state.modules);
+      _state = ns;
+      newBadges.forEach(b  => { _pendingModals.push({icon:b.icon, title:'🎖 Badge Desbloqueado!', sub:b.name, xp:b.xp}); showToast(`${b.icon} ${b.name}`, 'badge'); });
+      newAch.forEach(a     => { _pendingModals.push({icon:a.icon, title:'🏅 Conquista!',          sub:a.name+' — '+a.desc, xp:a.xp}); showToast(`${a.icon} ${a.name}`, 'badge'); });
+      newTrophies.forEach(t=> { _pendingModals.push({icon:t.icon, title:'🏆 Troféu!',             sub:t.name, xp:t.xp}); showToast(`${t.icon} ${t.name} conquistado!`, 'badge'); });
+      const info = Gamification.getLevelInfo(_state.xp);
+      if (info.current.level > (_state.level||1)) { _state.level=info.current.level; showToast(`⚡ Level Up! Nível ${info.current.level} — ${info.current.title}`, 'xp'); }
+    } else {
+      _state.progress[lid] = { done:false };
+    }
+
+    await Storage.save(_state);
+    Tracker.renderAll(_state);
+    if (!wasDone && _pendingModals.length > 0) _showNextModal();
+  }
+};
+
+// ── VIEWS ─────────────────────────────────────────────────────────
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const v = document.getElementById('view-'+name); if(v) v.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.getAttribute('onclick')?.includes(name)) n.classList.add('active'); });
+  if (name==='achievements') Tracker.renderAchievements(_state);
+  if (name==='stats')        Tracker.renderStats(_state);
+  if (name==='leaderboard')  Tracker.renderLeaderboard(_state);
+  if (_sidebarOpen && window.innerWidth<=768) toggleSidebar();
+}
+
+function toggleSidebar() {
+  _sidebarOpen = !_sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('open', _sidebarOpen);
+}
+
+document.addEventListener('click', e => {
+  if (_sidebarOpen && window.innerWidth<=768) {
+    const sb=document.getElementById('sidebar'), btn=document.querySelector('.topbar-menu');
+    if (!sb?.contains(e.target) && e.target!==btn) toggleSidebar();
+  }
+});
+
+// ── RESET ─────────────────────────────────────────────────────────
+function confirmReset() {
+  if (confirm('Apagar todo o progresso e iniciar um novo curso?')) {
+    Storage.clear(); _state=null; _pendingModals=[];
+    _showScreen('setup'); initEmojiPicker();
+  }
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  const c=document.getElementById('toast-container'), t=document.createElement('div');
+  t.className=`toast toast-${type}`; t.textContent=msg; c.appendChild(t);
+  setTimeout(()=>{ t.style.cssText='opacity:0;transform:translateX(20px);transition:all .3s'; setTimeout(()=>t.remove(),300); },3500);
+}
+
+function showXpPopup(text) {
+  const p=document.getElementById('xp-popup'); if(!p) return;
+  document.getElementById('xp-popup-text').textContent=text;
+  p.style.display='block'; p.style.animation='none'; void p.offsetWidth;
+  p.style.animation='xp-float 1.5s ease forwards';
+  setTimeout(()=>p.style.display='none',1500);
+}
+
+function _showNextModal() {
+  if (!_pendingModals.length) return;
+  const d=_pendingModals.shift();
+  document.getElementById('modal-badge-icon').textContent=d.icon;
+  document.getElementById('modal-title').textContent=d.title;
+  document.getElementById('modal-sub').textContent=d.sub;
+  document.getElementById('modal-xp').textContent=`+${d.xp} XP`;
+  document.getElementById('badge-modal').style.display='flex';
+}
+
+function closeBadgeModal() {
+  document.getElementById('badge-modal').style.display='none';
+  setTimeout(()=>{ if(_pendingModals.length) _showNextModal(); },200);
+}
+
+// Init on load
+window.addEventListener('DOMContentLoaded', () => { setTimeout(initEmojiPicker, 100); });
+</script>
 </body>
 </html>
